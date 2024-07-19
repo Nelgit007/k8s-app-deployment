@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vprodb
+  labels: ##needed for service definition file, service will route request to
+    app: vprodb  ##any pod with this label
+spec:
+  selector: 
+    matchLabels:
+      app: vprodb
+  replicas: 1
+  template:
+    metadata:
+      app: vprodb
+    spec:   ##pod spec
+      containers:
+        - name: vprodb
+          image: nelsonosagie/neldb:latest
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: vprodb-data
+          ports:
+            - name: vprodb-port
+              containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  - name: app-secret
+                    key: db-pass
+      nodeSelector:    ##Set you db to run in same region as node pod would be
+        zone: us-east-1a ##verify to see it corresponds with your server config
+      volumes:
+        - name: vprodb-data  ##Mount vol to pod
+          awsElasticBlockStore:
+            volumeID: <paste-ebs-id>
+            fsType: ext4
+
+      initContainers:  ## Remove lost+found dir with init containers
+        - name: busybox
+          image: busybox:latest
+          args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+          volumeMounts:
+            - name: vprodb-data
+              mountPath: /var/lib/mysql
