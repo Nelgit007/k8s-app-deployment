@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vprodb
-  labels: ##needed for service definition file, service will route request to
-    app: vprodb  ##any pod with this label
+  labels:
+    app: vprodb
 spec:
   selector: 
     matchLabels:
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       app: vprodb
-    spec:   ##pod spec
+    spec:
       containers:
         - name: vprodb
           image: nelsonosagie/neldb:latest
@@ -28,15 +28,15 @@ spec:
                 secretKeyRef:
                   - name: app-secret
                     key: db-pass
-      nodeSelector:    ##Set you db to run in same region as node pod would be
-        zone: us-east-1a ##verify to see it corresponds with your server config
+      nodeSelector:
+        zone: us-east-1a
       volumes:
-        - name: vprodb-data  ##Mount vol to pod
+        - name: vprodb-data
           awsElasticBlockStore:
             volumeID: vol-0ba3c1323e2425a66
             fsType: ext4
 
-      initContainers:  ## Remove lost+found dir with init containers
+      initContainers:  
         - name: busybox
           image: busybox:latest
           args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
