@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  - name: 
-    labels:
-      app: vpromq01
+  name: vpromq01
+  labels:
+    app: vpromq01
 spec:
   selector:
     matchLabels:
@@ -12,20 +12,19 @@ spec:
   template:
     metadata:
       labels:
-        app: vpromq01 ##pod label
+        app: vpromq01
     spec:
       containers:
-        - name: vpromq01
-          image: rabbitmq
-          ports:
-            - name: vpromq-port
-              containerPort: 15672
-
-          env:
-            - name: RABBITMQ_DEFAULT_PASS
-              valueFrom:
-                secretKeyRef:
-                  - name: app-secret
-                    key: rmq-pass
-            - name: RABBITMQ_DEFAULT_USER
-              value: "guest"
+      - name: vpromq01
+        image: rabbitmq
+        ports:
+        - name: vpromq-port
+          containerPort: 15672
+        env:
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: rmq-pass
+        - name: RABBITMQ_DEFAULT_USER
+          value: "guest"
