@@ -5,41 +5,45 @@ metadata:
   labels:
     app: vprodb
 spec:
-  selector: 
+  selector:
     matchLabels:
       app: vprodb
   replicas: 1
   template:
     metadata:
-      app: vprodb
+      labels:
+        app: vprodb
     spec:
       containers:
-        - name: vprodb
-          image: nelsonosagie/neldb:latest
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: vprodb-data
-          ports:
-            - name: vprodb-port
-              containerPort: 3306
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: app-secret
-                  key: db-pass
+      - name: vprodb
+        image: nelsonosagie/neldb:latest
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: vprodb-data
+        ports:
+        - name: vprodb-port
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: db-pass
       nodeSelector:
         zone: us-east-1a
       volumes:
+      - name: vprodb-data
+        awsElasticBlockStore:
+          volumeID: vol-0ba3c1323e2425a66
+          fsType: ext4
+      initContainers:
+      - name: busybox
+        image: busybox:latest
+        args:
+        - "rm"
+        - "-rf"
+        - "/var/lib/mysql/lost+found"
+        volumeMounts:
         - name: vprodb-data
-          awsElasticBlockStore:
-            volumeID: vol-0ba3c1323e2425a66
-            fsType: ext4
-
-      initContainers:  
-        - name: busybox
-          image: busybox:latest
-          args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
-          volumeMounts:
-            - name: vprodb-data
-              mountPath: /var/lib/mysql
+          mountPath: /var/lib/mysql
+          #####
