@@ -1,6 +1,11 @@
 pipeline {
 
     agent any
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Target Branch')
+    }
+
 /*
 	tools {
         maven "maven3"
@@ -16,6 +21,12 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 cleanWs()
+            }
+        }
+
+        stage('Clone Repository'){
+             steps{
+             git branch: 'main', url: 'https://github.com/Nelgit007/k8s-app-deployment.git'
             }
         }
 
