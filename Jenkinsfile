@@ -111,15 +111,16 @@ pipeline {
         stage('Remove Unused docker image') {
           steps{
             sh "docker rmi $registry:V$BUILD_NUMBER"
+            sh "docker rmi $registry:latest"
           }
         }
 
-        // stage('Kubernetes Deploy') {
-        //   agent {label 'KOPS'}
-        //     steps {
-        //       sh "helm upgrade --install --force vpro-stack helm/vprocharts --set appimage=${registry}:V${BUILD_NUMBER} --namespace production"
-        //     }
-        // }
+        stage('Kubernetes Deploy') {
+          agent {label 'KOPS'}
+            steps {
+              sh "helm upgrade --install --force vpro-stack helm/vprocharts --set appimage=${registry}:V${BUILD_NUMBER} --namespace production"
+            }
+        }
     }
 
 
